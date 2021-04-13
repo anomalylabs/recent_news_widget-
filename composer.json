@@ -1,5 +1,5 @@
 {
-    "name": "anomaly/xml_feed_widget-extension",
+    "name": "visiosoft/xml_feed_widget-extension",
     "type": "streams-addon",
     "description": "A dashboard widget that displays an XML feed.",
     "keywords": [
