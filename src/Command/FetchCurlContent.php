@@ -2,6 +2,7 @@
 
 use Anomaly\ConfigurationModule\Configuration\Contract\ConfigurationRepositoryInterface;
 use Anomaly\DashboardModule\Widget\Contract\WidgetInterface;
+use Illuminate\Http\Request;
 
 /**
  * Class FetchCurlContent
@@ -37,20 +38,24 @@ class FetchCurlContent
      * @param ConfigurationRepositoryInterface $configuration
      * @return null|\SimplePie_Item[]
      */
-    public function handle(\SimplePie $rss, ConfigurationRepositoryInterface $configuration)
+    public function handle(\SimplePie $rss, ConfigurationRepositoryInterface $configuration, Request $request)
     {
         // Let Laravel cache everything.
         $rss->enable_cache(false);
-
-        // Hard-code this for now.
-        $rss->set_feed_url(
-            $configuration->value(
-                'anomaly.extension.xml_feed_widget::url',
-                $this->widget->getId(),
-                'http://pyrocms.com/posts/rss.xml'
-            )
-        );
-
+        $url = $configuration->value('anomaly.extension.xml_feed_widget::url', $this->widget->getId());
+        if ($configuration->value('anomaly.extension.xml_feed_widget::multilingual_feeder', $this->widget->getId())) {
+            $locale = $request->session()->get('_locale');
+            $url = str_replace('{locale}', $locale, $url);
+            $rss->set_feed_url($url);
+        } else {
+            $rss->set_feed_url(
+                $configuration->value(
+                    'anomaly.extension.xml_feed_widget::url',
+                    $this->widget->getId(),
+                    'http://pyrocms.com/posts/rss.xml'
+                )
+            );
+        }
         // Make the request.
         $rss->init();
 
